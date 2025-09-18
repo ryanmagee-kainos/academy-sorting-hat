@@ -112,12 +112,11 @@ function renderApp() {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-      // Fair distribution: calculate team sizes
+      // Fair distribution: all teams display the same max size
       const nTeams = teams.length;
       const nPeople = people.length;
-      const baseSize = Math.floor(nPeople / nTeams);
-      const remainder = nPeople % nTeams;
-      const teamSizes = Array(nTeams).fill(baseSize).map((s, i) => s + (i < remainder ? 1 : 0));
+      const maxTeamSize = Math.ceil(nPeople / nTeams);
+      const teamSizes = Array(nTeams).fill(maxTeamSize);
       draftState = {
         round: 0,
         teamIndex: 0,
