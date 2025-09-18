@@ -20,7 +20,7 @@ A single-page web application for creating teams and randomly distributing peopl
 
 ### 3. Draft Phase
 - Click the "Draft" tab (enabled when you have at least 2 teams and 2 participants).
-- Click "Assign to Team" to assign the next participant in the waiting list to a random team, keeping teams as balanced as possible.
+- Click "Reveal Team" to assign the next participant in the waiting list to a random team, keeping teams as balanced as possible.
 - The draft proceeds one participant at a time, with a modal pop-up showing each assignment (participant and team names are bolded for clarity).
 - When all participants are assigned, click "View Results".
 
