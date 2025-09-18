@@ -150,7 +150,7 @@ function renderApp() {
             <div class="mt-6 text-center">
               ${draftState.remaining.length > 0 ? `
                 <div class="mb-2">Next up: <span class="font-semibold">${draftState.remaining[0]}</span></div>
-                <button id="next-pick" class="bg-accent px-6 py-2 rounded hover:opacity-90 transition">Assign to Team</button>
+                <button id="next-pick" class="bg-accent px-6 py-2 rounded hover:opacity-90 transition">Reveal Team</button>
               ` : `
                 <div class="mb-2 text-green-700 font-semibold">Draft complete! (Random, fair distribution)</div>
                 <button id="to-results" class="bg-accent px-6 py-2 rounded hover:opacity-90 transition">View Results</button>
