@@ -13,7 +13,7 @@ function showModal(msg, type = 'info') {
   const modal = document.getElementById('modal');
   const message = document.getElementById('modal-message');
   const okBtn = document.getElementById('modal-ok');
-  message.textContent = msg;
+  message.innerHTML = msg;
   modal.classList.remove('border-green-600','border-red-600','border-blue-600');
   modal.classList.add(type === 'error' ? 'border-red-600' : type === 'success' ? 'border-green-600' : 'border-blue-600');
   overlay.classList.remove('hidden');
@@ -35,12 +35,22 @@ let draftState = null; // { round, teamIndex, remaining, assignments }
 
 function renderApp() {
   const app = document.getElementById('app');
-  // Navigation
+  // Navigation with theme dropdown
   let nav = `
-    <div class="flex justify-center gap-4 mb-8">
-      <button class="phase-btn px-4 py-2 rounded ${phase === 'setup' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}" data-phase="setup">Setup</button>
-      <button class="phase-btn px-4 py-2 rounded ${phase === 'draft' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'} ${teams.length < 2 || people.length < 2 ? 'opacity-50 cursor-not-allowed' : ''}" data-phase="draft">Draft</button>
-      <button class="phase-btn px-4 py-2 rounded ${phase === 'results' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}" data-phase="results">Results</button>
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8 items-center">
+      <div class="flex gap-4">
+  <button class="phase-btn px-4 py-2 rounded ${phase === 'setup' ? 'bg-accent' : 'bg-gray-200 text-gray-700'}" data-phase="setup">Setup</button>
+  <button class="phase-btn px-4 py-2 rounded ${phase === 'draft' ? 'bg-accent' : 'bg-gray-200 text-gray-700'} ${teams.length < 2 || people.length < 2 ? 'opacity-50 cursor-not-allowed' : ''}" data-phase="draft">Draft</button>
+  <button class="phase-btn px-4 py-2 rounded ${phase === 'results' ? 'bg-accent' : 'bg-gray-200 text-gray-700'}" data-phase="results">Results</button>
+      </div>
+      <div class="flex items-center gap-2 mt-2 sm:mt-0">
+        <label for="theme-select" class="text-sm font-medium">Theme:</label>
+        <select id="theme-select" class="border rounded px-2 py-1 text-sm focus:outline-none">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <!-- Color scheme dropdown removed -->
+      </div>
     </div>
   `;
 
@@ -51,7 +61,7 @@ function renderApp() {
         <h2 class="text-xl font-semibold mb-4">Teams</h2>
         <form id="team-form" class="flex flex-col sm:flex-row gap-2 mb-4">
           <input type="text" id="team-name" class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring" placeholder="Team name" value="${editingTeamIndex !== null ? teams[editingTeamIndex] : ''}" required />
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+          <button type="submit" class="bg-accent px-4 py-2 rounded hover:opacity-90 transition">
             ${editingTeamIndex !== null ? 'Update' : 'Add'}
           </button>
           ${editingTeamIndex !== null ? `<button type="button" id="cancel-edit" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition">Cancel</button>` : ''}
@@ -61,7 +71,7 @@ function renderApp() {
             <li class="flex items-center justify-between py-2">
               <span>${team}</span>
               <div class="flex gap-2">
-                <button class="edit-team text-blue-600 hover:underline" data-index="${i}">Edit</button>
+                <button class="edit-team text-accent hover:underline" data-index="${i}">Edit</button>
                 <button class="delete-team text-red-600 hover:underline" data-index="${i}">Delete</button>
               </div>
             </li>
@@ -74,7 +84,7 @@ function renderApp() {
         <h2 class="text-xl font-semibold mb-4">Participants</h2>
         <form id="person-form" class="flex flex-col sm:flex-row gap-2 mb-4">
           <input type="text" id="person-name" class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring" placeholder="Participant name" value="${editingPersonIndex !== null ? people[editingPersonIndex] : ''}" required />
-          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+          <button type="submit" class="bg-accent px-4 py-2 rounded hover:opacity-90 transition">
             ${editingPersonIndex !== null ? 'Update' : 'Add'}
           </button>
           ${editingPersonIndex !== null ? `<button type="button" id="cancel-person-edit" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition">Cancel</button>` : ''}
@@ -84,7 +94,7 @@ function renderApp() {
             <li class="flex items-center justify-between py-2">
               <span>${person}</span>
               <div class="flex gap-2">
-                <button class="edit-person text-green-600 hover:underline" data-index="${i}">Edit</button>
+                <button class="edit-person text-accent hover:underline" data-index="${i}">Edit</button>
                 <button class="delete-person text-red-600 hover:underline" data-index="${i}">Delete</button>
               </div>
             </li>
@@ -96,6 +106,12 @@ function renderApp() {
   } else if (phase === 'draft') {
     // Initialize draft state if not already
     if (!draftState) {
+      // Shuffle people for random order
+      const shuffled = [...people];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
       // Fair distribution: calculate team sizes
       const nTeams = teams.length;
       const nPeople = people.length;
@@ -105,36 +121,51 @@ function renderApp() {
       draftState = {
         round: 0,
         teamIndex: 0,
-        remaining: [...people],
+        remaining: [...shuffled],
         assignments: Array(nTeams).fill(0).map(() => []),
         teamSizes
       };
     }
 
-    // Draft board UI
+    // Draft board UI with waiting list and team counters, one person at a time
     content = `
-      <div class="bg-white rounded shadow p-6 mb-6">
-        <h2 class="text-xl font-semibold mb-4">Draft Phase</h2>
-        <div class="flex flex-wrap gap-4 justify-center">
-          ${teams.map((team, i) => `
-            <div class="min-w-[160px] bg-gray-50 rounded shadow p-3">
-              <div class="font-semibold mb-2 text-center">${team}</div>
-              <ul class="min-h-[40px]">
-                ${draftState.assignments[i].map(p => `<li class="text-sm">${p}</li>`).join('')}
-              </ul>
-              <div class="text-xs text-gray-400 mt-2">${draftState.assignments[i].length}/${draftState.teamSizes[i]}</div>
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="md:w-2/3 w-full">
+          <div class="bg-white rounded shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Draft Phase</h2>
+            <div class="flex flex-wrap gap-4 justify-center">
+              ${teams.map((team, i) => `
+                <div class="min-w-[160px] bg-gray-50 rounded shadow p-3">
+                  <div class="font-semibold mb-2 text-center flex items-center justify-center gap-2">
+                    ${team}
+                    <span aria-label="Assigned count" class="ml-2 inline-block px-2 py-0.5 rounded-full bg-accent-bg text-accent text-xs font-bold">${draftState.assignments[i].length}</span>
+                  </div>
+                  <ul class="min-h-[40px]">
+                    ${draftState.assignments[i].map(p => `<li class="text-sm">${p}</li>`).join('')}
+                  </ul>
+                  <div class="text-xs text-gray-400 mt-2">of ${draftState.teamSizes[i]} max</div>
+                </div>
+              `).join('')}
             </div>
-          `).join('')}
+            <div class="mt-6 text-center">
+              ${draftState.remaining.length > 0 ? `
+                <div class="mb-2">Next up: <span class="font-semibold">${draftState.remaining[0]}</span></div>
+                <button id="next-pick" class="bg-accent px-6 py-2 rounded hover:opacity-90 transition">Assign to Team</button>
+              ` : `
+                <div class="mb-2 text-green-700 font-semibold">Draft complete! (Random, fair distribution)</div>
+                <button id="to-results" class="bg-accent px-6 py-2 rounded hover:opacity-90 transition">View Results</button>
+              `}
+            </div>
+          </div>
         </div>
-        <div class="mt-6 text-center">
-          ${draftState.remaining.length > 0 ? `
-            <div class="mb-2">Round <span class="font-semibold">${draftState.round + 1}</span> &mdash; <span class="font-semibold">${teams[draftState.teamIndex]}'s</span> pick</div>
-            <button id="next-pick" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Next Pick</button>
-          ` : `
-            <div class="mb-2 text-green-700 font-semibold">Draft complete!</div>
-            <button id="to-results" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">View Results</button>
-          `}
-        </div>
+        <aside class="md:w-1/3 w-full">
+          <div class="bg-white rounded shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-3">Waiting to be picked</h3>
+            <ul id="waiting-list" class="divide-y" aria-live="polite">
+              ${draftState.remaining.length === 0 ? `<li class="text-gray-400 text-sm">All participants assigned!</li>` : draftState.remaining.map(p => `<li class="py-1 text-sm">${p}</li>`).join('')}
+            </ul>
+          </div>
+        </aside>
       </div>
     `;
   } else if (phase === 'results') {
@@ -154,7 +185,7 @@ function renderApp() {
           `).join('')}
         </div>
         <div class="mt-6 text-center">
-          <button id="restart" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Restart Draft</button>
+          <button id="restart" class="bg-accent px-6 py-2 rounded hover:opacity-90 transition">Restart Draft</button>
         </div>
       </div>
     `;
@@ -167,11 +198,26 @@ function renderApp() {
     `;
   }
 
+
   app.innerHTML = `
     <h1 class="text-3xl font-bold mb-6 text-center">Draft Pick Application</h1>
     ${nav}
     ${content}
   `;
+
+  // Theme dropdown logic (must be after DOM update)
+  const themeSelect = document.getElementById('theme-select');
+  if (themeSelect) {
+    themeSelect.value = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+    themeSelect.onchange = (e) => {
+      if (e.target.value === 'dark') {
+        document.body.classList.add('theme-dark');
+      } else {
+        document.body.classList.remove('theme-dark');
+      }
+    };
+  }
+    // Color scheme dropdown logic removed
 
   // Navigation
   document.querySelectorAll('.phase-btn').forEach(btn => {
@@ -286,23 +332,20 @@ function renderApp() {
   }
 
   if (phase === 'draft' && draftState) {
-    // Next pick
+    // Next pick logic: assign next person to a random team with available space
     const nextBtn = document.getElementById('next-pick');
     if (nextBtn) {
       nextBtn.onclick = () => {
-        // Pick a random participant from remaining
-        const { teamIndex, teamSizes, assignments, remaining } = draftState;
+        const { teamSizes, assignments, remaining } = draftState;
         if (remaining.length === 0) return;
-        // Only pick if team not full
-        if (assignments[teamIndex].length < teamSizes[teamIndex]) {
-          const pickIdx = Math.floor(Math.random() * remaining.length);
-          const pick = remaining.splice(pickIdx, 1)[0];
-          assignments[teamIndex].push(pick);
-          showModal(`${pick} assigned to ${teams[teamIndex]}.`, 'success');
-        }
-        // Advance to next team
-        draftState.teamIndex = (teamIndex + 1) % teams.length;
-        if (draftState.teamIndex === 0) draftState.round++;
+        // Find teams with available space
+        const availableTeams = assignments.map((a, i) => a.length < teamSizes[i] ? i : null).filter(i => i !== null);
+        if (availableTeams.length === 0) return;
+        // Pick a random available team
+        const teamIdx = availableTeams[Math.floor(Math.random() * availableTeams.length)];
+        const pick = remaining.shift();
+        assignments[teamIdx].push(pick);
+  showModal(`<strong>${pick}</strong> assigned to <strong>${teams[teamIdx]}</strong>.`, 'success');
         renderApp();
       };
     }

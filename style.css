@@ -1,3 +1,100 @@
+/* Improve input, textarea, and select readability in dark mode */
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select {
+	background-color: #23272f !important;
+	color: #f1f5f9 !important;
+	border-color: #334155 !important;
+}
+body.theme-dark input::placeholder,
+body.theme-dark textarea::placeholder {
+	color: #94a3b8 !important;
+	opacity: 1;
+}
+body.scheme-purple {
+	--accent: #9333ea;
+	--accent-bg: #e9d5ff;
+}
+body.scheme-orange {
+	--accent: #ea580c;
+	--accent-bg: #ffedd5;
+}
+body.scheme-pink {
+	--accent: #db2777;
+	--accent-bg: #fbcfe8;
+}
+body.scheme-yellow {
+	--accent: #eab308;
+	--accent-bg: #fef9c3;
+}
+/* Color scheme variables */
+:root {
+	--accent: #2563eb; /* blue-600 */
+	--accent-bg: #dbeafe; /* blue-100 */
+}
+
+body.scheme-blue {
+	--accent: #2563eb;
+	--accent-bg: #dbeafe;
+}
+body.scheme-green {
+	--accent: #16a34a;
+	--accent-bg: #bbf7d0;
+}
+body.scheme-red {
+	--accent: #dc2626;
+	--accent-bg: #fecaca;
+}
+
+/* Accent utility classes */
+.bg-accent {
+	background-color: var(--accent) !important;
+	color: #fff !important;
+}
+.text-accent {
+	color: var(--accent) !important;
+}
+.bg-accent-bg {
+	background-color: var(--accent-bg) !important;
+}
+.bg-panel {
+	background-color: var(--panel) !important;
+}
+.text-panel {
+	color: var(--text) !important;
+}
 /* Custom styles for Draft Pick Application */
-body { background: #f8fafc; }
+
+body {
+	background: var(--bg, #f8fafc);
+	color: var(--text, #1e293b);
+}
 #app { min-height: 80vh; }
+
+/* Light theme (default) */
+:root {
+	--bg: #f8fafc;
+	--text: #1e293b;
+	--panel: #fff;
+	--panel-border: #e5e7eb;
+}
+
+/* Dark theme */
+body.theme-dark {
+	--bg: #18181b;
+	--text: #f1f5f9;
+	--panel: #23272f;
+	--panel-border: #334155;
+}
+
+.bg-white, .bg-gray-50 {
+	background-color: var(--panel) !important;
+	color: var(--text) !important;
+}
+.shadow, .rounded, .border, .divide-y {
+	border-color: var(--panel-border) !important;
+}
+.text-gray-400 { color: #94a3b8 !important; }
+.text-gray-600 { color: #64748b !important; }
+.text-blue-800 { color: #1e40af !important; }
+.bg-blue-100 { background-color: #dbeafe !important; }
